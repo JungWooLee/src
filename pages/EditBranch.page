@@ -1,0 +1,82 @@
+<apex:page standardController="Branch__c" extensions="BranchController" standardStylesheets="true" docType="html-5.0" >
+
+<head> 
+    <apex:stylesheet value="{!URLFOR($Resource.button_image_salesforce, 'btn.css')}"  />
+    <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-1.6.2.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-ui-1.8.15.custom.min.js')}"></script>
+</head>
+<body>
+<h1>대리점 등록</h1>
+
+  
+<apex:form id="mainForm">
+	<apex:PageBlock id="pBlock" >
+	 <apex:pageBlockButtons location="both">
+                            <apex:commandButton value="저장"  status="IngStatus" rerender="mainForm" action="{!save}" rendered="{!pageMode='E'}"/>               
+                            <apex:commandButton value="대리점목록"  status="IngStatus" rerender="mainForm" action="{!branchList}" immediate="true"/>     
+                        </apex:pageBlockButtons>
+		<apex:pageBlockSection id="sc1" columns="2" rendered="{!pageMode='E'}">
+			 <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="대리점이름" />                                
+			 	<apex:inputField value="{!branch.Name}" type="text" style="width:400px;" required="true"/>
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />
+			 
+			  <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="대리점ID" />                                
+			 	<apex:inputField value="{!branch.BranchID__c}" type="text" style="width:400px;" required="true"/>
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />
+			 
+			  <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="대리점비밀번호" />                                
+			 	<apex:inputField value="{!branch.BranchPW__c}" type="text" style="width:400px;" required="true"/>
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />
+			 
+			  <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="등급" />                                
+			 	<apex:inputField value="{!branch.Ranking__c}" type="text" style="width:400px;"/>
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />
+			 
+			  <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="매니저메일" />                                
+			 	<apex:inputField value="{!branch.ManagerEmail__c}" type="text" style="width:400px;"/>
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />
+			 
+			 <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="우편번호" />                                
+             <apex:outputPanel >
+             	<apex:inputField value="{!branch.ZipCode__c}" type="text" styleClass="zipcode" style="width:300px;"/>
+             	<apex:commandButton value="우편번호찾기" onclick="execDaumPostcode()" rerender="mainForm" immediate="true" style="width:50px;margin-right:1em;"/>
+             </apex:outputPanel>	
+                  </apex:pageBlockSectionItem>						
+			 <apex:pageBlockSectionItem />
+			 							
+							
+			<apex:pageBlockSectionItem >
+             	<apex:outputLabel value="주소" />                                
+			 	<apex:inputField value="{!branch.Address__c}" type="text" style="width:400px;" styleClass="address" id="addresss"/>
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />
+			
+			 
+			 <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="주소상세" />                                
+			 	<apex:inputField value="{!branch.AddressDetail__c}" type="text" style="width:400px;" styleClass="addressdetail" />
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />
+			 
+			 <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="직원수" />                                
+			 	<apex:inputField value="{!branch.Employees__c}" type="text" style="width:400px;" />
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />			
+		</apex:pageBlockSection>
+		</apex:PageBlock>
+</apex:form> 
+</body>
+</apex:page>

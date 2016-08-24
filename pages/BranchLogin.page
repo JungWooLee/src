@@ -1,0 +1,38 @@
+<apex:page id="loginPage" showHeader="false" title="Branch_login" controller="SiteBranchController">
+<apex:form id="mainform" >
+<apex:pageMessages id="error"/>
+	<apex:define name="body">
+		<center>
+			<apex:panelGrid bgcolor="white" columns="1" rendered="{!!viewPoion}"> 
+				<br/><br/>
+          		<apex:panelGrid width="758" cellpadding="0" cellspacing="0" bgcolor="white" columns="1" styleClass="topPanelContainer"> 
+            		<br/>
+            		<apex:outputPanel layout="block" styleClass="topPanel">
+              			<apex:panelGrid width="758" cellpadding="0" cellspacing="0" bgcolor="white" columns="2"> 
+                			<apex:image url="{!URLFOR($Resource.SiteSamples, 'img/clock.png')}"/>
+                			<apex:panelGroup >
+                  				<br/>
+                  				<apex:outputText styleClass="title" value="{!$Label.site.login}"/>
+                  				<br/>
+				  				<apex:outputPanel layout="block">
+				      				<apex:panelGrid columns="2" style="margin-top:1em;">
+				        				<apex:outputLabel value="{!$Label.site.username}" for="username"/>
+				        				<apex:inputField id="username" value="{!branch.BranchID__c}" required="true"/> <!-- id -->
+				        				<apex:outputLabel value="{!$Label.site.password}" for="password"/>
+				        				<apex:inputField id="password" value="{!branch.BranchPW__c}" required="true"/> <!-- Pass -->
+				        				<apex:outputText value=""/>
+				        				<apex:commandButton action="{!login}" value="{!$Label.site.login_button}" id="loginButton" rerender="mainform"/>
+				      				</apex:panelGrid>
+				    			</apex:outputPanel>
+                  				<br/>
+                			</apex:panelGroup>
+              			</apex:panelGrid> 
+             		</apex:outputPanel>
+          		</apex:panelGrid> 
+       		</apex:panelGrid>
+    		<apex:iframe src="https://namu.wiki/w/" scrolling="true" id="branchframe" width="90%" height="800px;" rendered="{!viewPoion}"/>   
+      	</center>
+      <br/>
+    </apex:define>
+</apex:form>  
+</apex:page>

@@ -1,0 +1,53 @@
+<apex:page controller="SearchProductController">
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous" />
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+	<div id="mainBody">
+		<apex:form id="mainForm">
+			<apex:pageBlock >
+				<div style="float:left">
+					<apex:pageBlockSection >
+						상품명 : <apex:inputText value="{!searchKeyword}" />
+						<apex:commandButton value="검색" action="{!setProductList}" />
+					</apex:pageBlockSection>
+				</div>
+				<apex:pageBlockTable value="{!productList}" var="item">
+					<apex:column value="{!item.Code__c}" />
+					<apex:column >
+						<apex:facet name="header">상품 이름</apex:facet>
+						<apex:outputLink value="SearchDetail?Id={!item.Id}&searchKeyword={!searchKeyword}">{!item.Name}</apex:outputLink>
+					</apex:column>
+					<apex:column value="{!item.Category1__c}" />
+					<apex:column value="{!item.Category2__c}" />
+					<apex:column value="{!item.Category3__c}" />
+					<apex:column value="{!item.ProductYear__c}" />
+				</apex:pageBlockTable>
+			</apex:pageBlock>
+			<div class="text-center">
+				<nav aria-label="Page navigation">
+					<ul class="pagination">
+						<li>
+							<a href="#" aria-label="Previous">
+								<span aria-hidden="true">&laquo;</span>
+							</a>
+						</li>
+						<li><a href="SearchProduct">1</a></li>
+						<li><a href="SearchProduct">2</a></li>
+						<li><a href="SearchProduct">3</a></li>
+						<li><a href="SearchProduct">4</a></li>
+						<li><a href="SearchProduct">5</a></li>
+						<li>
+							<a href="#" aria-label="Next">
+								<span aria-hidden="true">&raquo;</span>
+							</a>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</apex:form>
+	</div>
+</body>
+</apex:page>

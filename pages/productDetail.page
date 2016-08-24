@@ -1,0 +1,163 @@
+<apex:page standardController="Product__c" extensions="productController" standardStylesheets="true" docType="html-5.0">
+<head>
+    <apex:stylesheet value="{!URLFOR($Resource.button_image_salesforce, 'btn.css')}"  />
+    <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-1.6.2.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-ui-1.8.15.custom.min.js')}"></script>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();    
+        $j(document).ready(function(){
+            $j("#waitWindow").dialog({ autoOpen: false, modal: true, position: 'center', closeText: 'hide', draggable: false, title:'처리중...' });
+            $j('.disabled').attr('disabled','disabled');
+        });     
+         
+        function showDialog(){
+            $j("#waitWindow").dialog("open");
+            return false;
+        }
+        
+        function hideDialog(){
+            $j("#waitWindow").dialog("close");
+            return false;
+        }         
+        
+
+    </script>
+</head> 
+<body>
+    <apex:form id="mainForm">
+        <apex:sectionHeader title="상품등록 > 상품상세정보"/>
+        <apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
+        <apex:PageMessages escape="false" />
+        <!-- Functions -->
+        <apex:actionFunction action="{!goMoveSection}" name="AF_goMoveSection" status="IngStatus"  rerender="mainForm" Immediate="true"> 
+            <apex:param name="sectionSeq" value="" assignTo="{!sectionSeq}"/>
+        </apex:actionFunction>	        
+        <!-- Functions -->
+        <table>
+            <tr>
+                <td width="200px"><!-- 여기가 세션 네비게이터 -->
+                    <apex:outputPanel >
+                        <span class="buttonyh {!IF(sectionSeq='1','blue','')} large" style="margin-bottom:2px;">
+                            <a style="width:200px;" href="javascript:AF_goMoveSection('1');" target="_parent">
+                                1.상품정보
+                            </a>
+                        </span>
+                        <span class="buttonyh {!IF(sectionSeq='2','blue','')} large" style="margin-bottom:2px;">
+                            <a style="width:200px;" href="javascript:AF_goMoveSection('2');" target="_parent">
+                                2.상품상세정보
+                            </a>
+                        </span>                     
+                    </apex:outputPanel>
+                </td>       
+        
+                <td width="100%">
+                    <apex:PageBlock >
+                        <apex:pageBlockSection id="sc2" columns="2" title="상품정보">
+                            <apex:outputField label="상품명" value="{!product.Name}"/>
+                            <apex:outputField value="{!product.Code__c}"/>
+                            
+                            <apex:outputField value="{!product.Category1__c}"/>
+                            <apex:outputField value="{!product.Category2__c}" />
+                            
+                            <apex:outputField value="{!product.Category3__c}" />
+                            <apex:pageBlockSectionItem ></apex:pageBlockSectionItem>
+                        </apex:pageBlockSection>        
+
+                        <apex:pageBlockButtons location="both">
+                            <apex:commandButton value="상품상세 저장" action="{!detailSave}" status="IngStatus" rerender="mainForm"/>
+                            <apex:commandButton value="상품목록" action="{!productList}" status="IngStatus" rerender="mainForm" immediate="true"/>     
+                        </apex:pageBlockButtons> 
+                        
+                        <apex:pageBlockSection id="sc1" columns="1" title="상품상세정보">
+                        	<apex:outputPanel style="float:right;">
+                        		<apex:commandButton action="{!detailPlus}" value="+" rerender="mainForm" immediate="true" style="width:50px;margin-right:1em;"/>
+                        		<apex:commandButton action="{!detailMinus}" value="-" rerender="mainForm" immediate="true" style="width:50px;"/>
+                        	</apex:outputPanel>
+	                        <apex:pageBlockTable value="{!productDetailList}" var="list" id="sc1" title="상품상세정보">
+								<apex:column >
+									<apex:facet name="header">모델코드</apex:facet>
+									<apex:outputField value="{!list.ModelCode__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>
+									<apex:outputPanel styleClass="requiredInput" layout="block">
+		                                <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	                                	<apex:inputField value="{!list.ModelCode__c}" rendered="{!list.Id=null}" />
+	                            	</apex:outputPanel>
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">수량</apex:facet>
+									<apex:outputField value="{!list.Count__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>
+									<apex:outputPanel styleClass="requiredInput" layout="block">
+		                                <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	                                	<apex:inputField value="{!list.Count__c}" rendered="{!list.Id=null}" style="width:50px;"/>
+	                            	</apex:outputPanel>									
+								</apex:column>								
+								<apex:column >
+									<apex:facet name="header">사이즈(가로,mm)</apex:facet>
+									<apex:outputField value="{!list.Horizontal__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>
+									<apex:inputField value="{!list.Horizontal__c}" rendered="{!list.Id=null}" style="width:50px;"/>
+								</apex:column>
+								<apex:column >		
+									<apex:facet name="header">사이즈(세로,mm)</apex:facet>							
+									<apex:outputField value="{!list.Height__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>
+									<apex:inputField value="{!list.Height__c}" rendered="{!list.Id=null}" style="width:50px;"/>
+								</apex:column>
+								<apex:column >									
+									<apex:facet name="header">사이즈(높이,mm)</apex:facet>
+									<apex:outputField value="{!list.Vertical__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>		
+									<apex:inputField value="{!list.Vertical__c}" rendered="{!list.Id=null}" style="width:50px;"/>																
+								</apex:column>
+								<apex:column >									
+									<apex:facet name="header">색상</apex:facet>
+									<apex:outputField value="{!list.Color__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>			
+									<apex:inputField value="{!list.Color__c}" rendered="{!list.Id=null}" style="width:100px;"/>															
+								</apex:column>		
+								<apex:column >									
+									<apex:facet name="header">생산년도</apex:facet>
+									<apex:outputField value="{!list.ProductionYear__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>			
+									<apex:inputField value="{!list.ProductionYear__c}" rendered="{!list.Id=null}" />															
+								</apex:column>									
+								<apex:column >									
+									<apex:facet name="header">원가</apex:facet>
+									<apex:outputField value="{!list.OrgPrice__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>				
+									<apex:inputField value="{!list.OrgPrice__c}" rendered="{!list.Id=null}" />														
+								</apex:column>									
+								<apex:column >									
+									<apex:facet name="header">할인율(%)</apex:facet>
+									<apex:outputField value="{!list.DiscountRate__c}" rendered="{!list.Id<>null}">
+										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+									</apex:outputField>		
+									<apex:inputField value="{!list.DiscountRate__c}" rendered="{!list.Id=null}" style="width:50px;"/>																
+								</apex:column>		
+								<apex:column >									
+									<apex:facet name="header">판매가</apex:facet>
+									<apex:outputField value="{!list.Price__c}"/>											
+								</apex:column>																					                      
+	                        </apex:pageBlockTable>
+						</apex:pageBlockSection>
+                    </apex:PageBlock>
+            	</td>            	
+            </tr>
+        </table>            
+    </apex:form>
+</body>
+<div id="waitWindow" style="text-align:center;">
+    <img src="{!URLFOR($Resource.YUI, 'rel_interstitial_loading.gif')}"/>
+    <div>처리중입니다.<br/>이창을 닫지 마시고 잠시만 기다리세요</div>
+</div>  
+</apex:page>

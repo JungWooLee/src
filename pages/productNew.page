@@ -1,0 +1,163 @@
+<apex:page standardController="Product__c" extensions="productController" standardStylesheets="true" docType="html-5.0">
+<head>
+    <apex:stylesheet value="{!URLFOR($Resource.button_image_salesforce, 'btn.css')}"  />
+    <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-1.6.2.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-ui-1.8.15.custom.min.js')}"></script>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();    
+        $j(document).ready(function(){
+            $j("#waitWindow").dialog({ autoOpen: false, modal: true, position: 'center', closeText: 'hide', draggable: false, title:'처리중...' });
+            $j('.disabled').attr('disabled','disabled');
+        });     
+         
+        function showDialog(){
+            $j("#waitWindow").dialog("open");
+            return false;
+        }
+        
+        function hideDialog(){
+            $j("#waitWindow").dialog("close");
+            return false;
+        }         
+
+	</script>
+</head> 
+<body>
+    <apex:form id="mainForm">
+		<apex:sectionHeader title="상품등록"/>
+		<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
+        <apex:PageMessages escape="false" />
+		<!-- Functions -->
+        <apex:actionFunction action="{!goMoveSection}" name="AF_goMoveSection" status="IngStatus"  rerender="mainForm" Immediate="true"> 
+            <apex:param name="sectionSeq" value="" assignTo="{!sectionSeq}"/>
+        </apex:actionFunction>		
+		<!-- Functions -->
+		<table>
+            <tr>
+                <td width="200px"><!-- 여기가 세션 네비게이터 -->
+                    <apex:outputPanel >
+	                    <span class="buttonyh {!IF(sectionSeq='1','blue','')} large" style="margin-bottom:2px;">
+	                        <a style="width:200px;" href="javascript:AF_goMoveSection('1');" target="_parent">
+	                            1.상품정보
+	                        </a>
+	                    </span>
+	                    <span class="buttonyh {!IF(sectionSeq='2','blue','')} large" style="margin-bottom:2px;">
+	                        <a style="width:200px;" href="javascript:AF_goMoveSection('2');" target="_parent">
+	                            2.상품상세정보
+	                        </a>
+	                    </span>	                    
+                    </apex:outputPanel>
+                </td>		
+		
+				<td width="100%">
+                    <apex:PageBlock >
+                        <apex:pageBlockButtons location="both">
+                            <apex:commandButton value="저장" action="{!save}" status="IngStatus" rerender="mainForm" rendered="{!pageMode='E'}"/>
+                            <apex:commandButton value="수정" action="{!edit}" status="IngStatus" rendered="{!pageMode='V'}" rerender="mainForm" immediate="true"/>
+                            <apex:commandButton value="상품목록" action="{!productList}" status="IngStatus" rerender="mainForm" immediate="true"/>     
+                        </apex:pageBlockButtons> 
+
+						<apex:pageBlockSection id="sc1" columns="2" rendered="{!pageMode='E'}">
+                            <apex:pageBlockSectionItem >
+                                <apex:outputLabel value="상품명" />                                
+								<apex:inputField value="{!product.Name}" type="text" style="width:400px;" required="true"/>
+                             </apex:pageBlockSectionItem>							
+							<apex:pageBlockSectionItem />
+
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="상품코드" />
+                                <apex:inputField value="{!product.Code__c}" style="width:400px;" required="true"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />	
+                            
+                            <apex:pageBlockSectionItem >
+                                <apex:outputLabel value="위탁여부" />
+								<apex:outputPanel styleClass="requiredInput" layout="block">
+	                                <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                	<apex:inputField styleClass="clsRequired" value="{!product.Consignment__c}"/>
+                            	</apex:outputPanel>
+                            </apex:pageBlockSectionItem>							
+							<apex:pageBlockSectionItem />
+							
+                            <apex:pageBlockSectionItem >
+                                <apex:outputLabel value="거래처" />
+                                <apex:inputField styleClass="account" value="{!product.Account__c}" style="width:200px;"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />
+							
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="카테고리(대분류)" />
+                                <apex:inputField value="{!product.Category1__c}" required="true"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />
+							
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="카테고리(중분류)" />
+                                <apex:inputField value="{!product.Category2__c}" required="true"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />
+							
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="카테고리(소분류)" />
+                                <apex:inputField value="{!product.Category3__c}" />
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />
+							
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="제조사" />
+                                <apex:inputField value="{!product.Manufacturer__c}" style="width:200px;"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />
+							
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="비과세여부" />
+                                <apex:inputField value="{!product.vat__c}"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />
+							
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="상품년식" />
+                                <apex:inputField value="{!product.ProductYear__c}" style="width:200px;"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />							
+							
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="무게" />
+                                <apex:inputField value="{!product.Weight__c}" style="width:200px;"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />							
+							
+							<apex:pageBlockSectionItem >
+                                <apex:outputLabel value="상품설명" />
+                                <apex:inputField value="{!product.Description__c}" style="width:400px;"/>
+                            </apex:pageBlockSectionItem>							 
+							<apex:pageBlockSectionItem />															
+						</apex:pageBlockSection>
+
+						<apex:pageBlockSection id="sc2" columns="1" rendered="{!pageMode='V'}">                                
+							<apex:outputField label="상품명" value="{!product.Name}"/>
+							<apex:outputField value="{!product.Code__c}"/>
+                            <apex:outputField value="{!product.Consignment__c}"/>
+                            <apex:outputField value="{!product.Account__c}" style="width:200px;"/>
+                            <apex:outputField value="{!product.Category1__c}"/>
+                            <apex:outputField value="{!product.Category2__c}" />
+                            <apex:outputField value="{!product.Category3__c}" />
+                            <apex:outputField label="제조사" value="{!product.Manufacturer__c}" style="width:200px;"/>
+                            <apex:outputField value="{!product.vat__c}"/>
+                            <apex:outputField value="{!product.ProductYear__c}" style="width:200px;"/>
+                            <apex:outputField value="{!product.Weight__c}" style="width:200px;"/>
+                            <apex:outputField value="{!product.Description__c}" style="width:400px;"/>
+						</apex:pageBlockSection>						
+					</apex:PageBlock>
+				</td>
+			</tr>
+		</table>			
+	</apex:form>
+<apex:relatedList title="상품상세정보" id="productetails" list="ProductDetails__r" subject="{!product.Id}" rendered="{!pageMode='V'}"/>	 
+</body>
+<div id="waitWindow" style="text-align:center;">
+    <img src="{!URLFOR($Resource.YUI, 'rel_interstitial_loading.gif')}"/>
+    <div>처리중입니다.<br/>이창을 닫지 마시고 잠시만 기다리세요</div>
+</div>	
+</apex:page>
