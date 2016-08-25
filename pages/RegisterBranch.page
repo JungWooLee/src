@@ -1,5 +1,5 @@
 <apex:page standardController="Branch__c" extensions="BranchController" standardStylesheets="true" docType="html-5.0" >
-
+ 
 <head> 
     <apex:stylesheet value="{!URLFOR($Resource.button_image_salesforce, 'btn.css')}"  />
     <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
@@ -14,15 +14,15 @@
 	</script>
 </head>
 <body>
-<h1>{!If(branchid=null, '대리점 등록', '대리점 수정')}</h1>
+<h1>{!If(branchid=null, '대리점 등록', If(ISNULL(isRegister),'대리점 수정','대리점 등록완료') )}</h1>
 
 <apex:form id="mainForm">
 <apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
-<apex:actionFunction name="branchList" action="{!branchList}" />
+<apex:actionFunction name="branchList" action="{!branchList}" immediate="true"/>
 	<apex:PageBlock id="pBlock" >
 	 <apex:pageBlockButtons location="both">
               <apex:commandButton value="저장"  status="IngStatus" rerender="mainForm" action="{!save}" rendered="{!pageMode='E'}"/>               
-              <input type="button" class="btn btn-class" value="대리점목록"  status="IngStatus"  onclick="callBranchList()" immediate="true"/>     
+              <input type="button" class="btn btn-class" value="대리점목록"  status="IngStatus"  onclick="branchList()" immediate="true"/>     
      </apex:pageBlockButtons>
                 
 		<apex:pageBlockSection id="sc1" columns="2" rendered="{!pageMode='E'}">
@@ -78,6 +78,12 @@
 			 	<apex:inputField value="{!branch.Employees__c}" type="text" style="width:400px;" />
              </apex:pageBlockSectionItem>							
 			 <apex:pageBlockSectionItem />	
+			 
+			  <apex:pageBlockSectionItem >
+             	<apex:outputLabel value="연락처" />                                
+			 	<apex:inputField value="{!contact.Phone}" type="text" style="width:400px;" />
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />	
 			 		
 		</apex:pageBlockSection>
 		
@@ -91,6 +97,7 @@
                             <apex:outputField value="{!branch.Address__c}" />                    
                             <apex:outputField value="{!branch.AddressDetail__c}"/>
                             <apex:outputField value="{!branch.Employees__c}" />
+                            <apex:outputField value="{!contact.Phone}" />
                            
 						</apex:pageBlockSection>
 		
@@ -103,8 +110,20 @@
 </div>
 
 
+<script src="/soap/ajax/30.0/connection.js"> </script >
+<script src="/soap/ajax/30.0/apex.js"> </script >
+
 <script src="https://spi.maps.daum.net/imap/map_js_init/postcode.v2.js"></script>
     <script>
+    
+  
+	
+	/*
+	function branchList(){
+		//sforce.apex.excute("BranchController", "branchList",{});
+		BranchController.branchList();
+	}
+	*/
     $j = jQuery.noConflict();
     
     function callBranchList(){

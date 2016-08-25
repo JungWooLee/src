@@ -1,0 +1,47 @@
+<apex:page controller="ShowOrderListController" sidebar="false" showHeader="false" title="Branch_ShowOrderList">
+<head>
+	<apex:stylesheet value="{!URLFOR($Resource.button_image_salesforce, 'btn.css')}"  />
+    <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-1.6.2.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-ui-1.8.15.custom.min.js')}"></script>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();    
+        $j(document).ready(function(){
+            $j("#waitWindow").dialog({ autoOpen: false, modal: true, position: 'center', closeText: 'hide', draggable: false, title:'처리중...' });
+            $j('.disabled').attr('disabled','disabled');
+        });     
+         
+        function showDialog(){
+            $j("#waitWindow").dialog("open");
+            return false;
+        }
+        
+        function hideDialog(){
+            $j("#waitWindow").dialog("close");
+            return false;
+        }         
+
+	</script>
+</head>
+<body>
+	<div id="mainBody">
+		<apex:form id="mainForm">
+			<apex:actionStatus onstart="showDialog();" onstop="hideDialog();" id="IngStatus"/>
+			<apex:sectionHeader title="주문정보" />
+			<apex:pageBlock >
+				<apex:pageBlockButtons location="bottom">
+					<apex:commandButton action="{!goProductList}" value="상품목록" status="IngStatus" rerender="mainForm" />
+				</apex:pageBlockButtons>
+				<apex:pageBlockTable value="{!OrderList}" var="item">
+					<apex:column value="{!item.ProductDetail__c}" />
+					<apex:column value="{!item.ProductCount__c}" />
+				</apex:pageBlockTable>
+			</apex:pageBlock>
+		</apex:form>
+	</div>
+</body>
+<div id="waitWindow" style="text-align:center;">
+    <img src="{!URLFOR($Resource.YUI, 'rel_interstitial_loading.gif')}"/>
+    <div>처리중입니다.<br/>이창을 닫지 마시고 잠시만 기다리세요</div>
+</div>	
+</apex:page>

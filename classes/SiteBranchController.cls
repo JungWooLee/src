@@ -13,7 +13,7 @@ public with sharing class SiteBranchController {
     	if(temps.size() < 1){
     		ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'ID, PassWord를 확인해 주세요.'));
     	}else{
-    		siteUrl = '/apex/branchProduct?Id='+temps[0].Id;
+    		siteUrl = '/apex/SearchProduct?Id='+temps[0].Id;
     		viewPoion = true;	
     	}
     }

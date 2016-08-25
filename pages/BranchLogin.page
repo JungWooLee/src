@@ -30,7 +30,7 @@
              		</apex:outputPanel>
           		</apex:panelGrid> 
        		</apex:panelGrid>
-    		<apex:iframe src="https://namu.wiki/w/" scrolling="true" id="branchframe" width="90%" height="800px;" rendered="{!viewPoion}"/>   
+    		<apex:iframe src="{!siteUrl}" scrolling="true" id="branchframe" width="90%" height="800px;" rendered="{!viewPoion}"/>   
       	</center>
       <br/>
     </apex:define>

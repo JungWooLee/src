@@ -1,7 +1,5 @@
-<apex:page controller="SearchDetailController">
+<apex:page controller="SearchDetailController" sidebar="false" showHeader="false" title="Branch_SearchDetail"> 
 <head>
-    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-1.6.2.min.js')}"></script>
-	
 	<script>
 		function fnSelect(chkboxCtrl, chkboxValue){
 			if(chkboxCtrl.checked == true){
@@ -12,12 +10,36 @@
 			}
 		}
 	</script>
+	
+	<apex:stylesheet value="{!URLFOR($Resource.button_image_salesforce, 'btn.css')}"  />
+    <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-1.6.2.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-ui-1.8.15.custom.min.js')}"></script>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();    
+        $j(document).ready(function(){
+            $j("#waitWindow").dialog({ autoOpen: false, modal: true, position: 'center', closeText: 'hide', draggable: false, title:'처리중...' });
+            $j('.disabled').attr('disabled','disabled');
+        });     
+         
+        function showDialog(){
+            $j("#waitWindow").dialog("open");
+            return false;
+        }
+        
+        function hideDialog(){
+            $j("#waitWindow").dialog("close");
+            return false;
+        }         
+
+	</script>
 </head>
 <body>
 	<div id="mainBody">
 		<apex:form id="mainForm">
 		<apex:pageMessages id="msg"/>
 			<apex:sectionHeader title="상세정보" />
+			<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
 			<apex:pageBlock >
 				<apex:pageBlockTable id="detailTable" value="{!detailList}" var="item">
 					<apex:column >
@@ -36,8 +58,8 @@
 			<apex:sectionHeader title="주문목록" />
 			<apex:pageBlock >
 				<apex:pageBlockButtons location="bottom">
-					<apex:commandButton value="주문" action="{!doOrder}" rerender="requestTable, detailTable, msg" />
-					<apex:commandButton value="상품목록으로" action="{!goProductList}"/>
+					<apex:commandButton value="주문" action="{!doOrder}" rerender="requestTable, detailTable, msg" status="IngStatus" />
+					<apex:commandButton value="상품목록으로" action="{!goProductList}" rerender="mainForm" status="IngStatus" />
 					<!-- <input type="button" class="btn" value="주문" onclick="fnOrder('{!orderList}')" /> -->
 				</apex:pageBlockButtons>
 				<apex:pageBlockTable id="requestTable" value="{!orderList}" var="item">
@@ -79,4 +101,8 @@
 		</apex:form>
 	</div>
 </body>
+<div id="waitWindow" style="text-align:center;">
+    <img src="{!URLFOR($Resource.YUI, 'rel_interstitial_loading.gif')}"/>
+    <div>처리중입니다.<br/>이창을 닫지 마시고 잠시만 기다리세요</div>
+</div>	
 </apex:page>

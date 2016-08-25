@@ -6,17 +6,21 @@
 * Description   : 
 */
 public with sharing class productController {
+	public Boolean detailflag{get;set;}
     public String pageMode{get;set;}
     public String sectionSeq{get;set;}
     public String productId{get;set;}
+    public String productDetailId{get;set;}
     
     public Product__c product{get;set;}
     public Account account{get;set;}
+    public ProductDetail__c editProductDetail{get;set;}
     
     public List<ProductDetail__c> productDetailList{get;set;}
     public List<ProductDetail__c> productDetailDeleteList{get;set;}
     
     public productController(ApexPages.StandardController stdCon){
+    	detailflag = false;
         productId = stdCon.getId();
         sectionSeq = Apexpages.currentPage().getParameters().get('seq'); 
         productDetailList = new List<ProductDetail__c>();
@@ -116,6 +120,32 @@ public with sharing class productController {
     		if(productDetailDeleteList.size() > 0) delete productDetailDeleteList;	
     	}catch (Exception e){
     		ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, '상품상세를 저장할 수 없습니다. Error Message:('+e+')'));	
+    	}
+    }
+    
+    public void detailUpdate(){
+    	detailflag = false;
+    	try{
+    		update editProductDetail;
+    		getProductDetail();
+		}catch (Exception e) {
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, '상품상세를 수정할 수 없습니다. Error Message:('+e+')'));
+    	}    		
+    }
+    
+    public void detailCancel(){
+    	detailflag = false;
+    	editProductDetail = new ProductDetail__c();
+    }
+    
+    public void detailEdit(){
+		detailflag = true;    	
+    	try{
+	    	editProductDetail = [SELECT Id, ModelCode__c, Horizontal__c, Height__c, Vertical__c, Count__c
+	                                , Color__c, ProductionYear__c, OrgPrice__c, SoldOut__c, DiscountRate__c 
+								FROM ProductDetail__c WHERE Id =: productDetailId];
+    	}catch (Exception e) {
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, '상품상세를 수정할 수 없습니다. Error Message:('+e+')'));
     	}
     }
     

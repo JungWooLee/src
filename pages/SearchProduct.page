@@ -1,24 +1,50 @@
-<apex:page controller="SearchProductController">
+<apex:page controller="SearchProductController" sidebar="false" showHeader="false" title="Branch_Search"> 
 <head>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous" />
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous" />
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	
+    <apex:stylesheet value="{!URLFOR($Resource.button_image_salesforce, 'btn.css')}"  />
+    <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-1.6.2.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-ui-1.8.15.custom.min.js')}"></script>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();    
+        $j(document).ready(function(){
+            $j("#waitWindow").dialog({ autoOpen: false, modal: true, position: 'center', closeText: 'hide', draggable: false, title:'처리중...' });
+            $j('.disabled').attr('disabled','disabled');
+        });     
+         
+        function showDialog(){
+            $j("#waitWindow").dialog("open");
+            return false;
+        }
+        
+        function hideDialog(){
+            $j("#waitWindow").dialog("close");
+            return false;
+        }         
+
+	</script>
 </head>
 <body>
 	<div id="mainBody">
+		<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
+		<apex:sectionHeader title="상품검색" />
+		<apex:pageBlock >
+			<apex:form >
+				상품명 : <apex:inputText value="{!searchKeyword}" style="width:400px; margin-left:5px" />
+				<apex:commandButton value="검색" action="{!setProductList}" status="IngStatus" style="margin-left:5px" rerender="productTable, pagination" />
+			</apex:form>
+		</apex:pageBlock>
 		<apex:form id="mainForm">
+			<apex:pageMessages />
 			<apex:pageBlock >
-				<div style="float:left">
-					<apex:pageBlockSection >
-						상품명 : <apex:inputText value="{!searchKeyword}" />
-						<apex:commandButton value="검색" action="{!setProductList}" />
-					</apex:pageBlockSection>
-				</div>
-				<apex:pageBlockTable value="{!productList}" var="item">
+				<apex:pageBlockTable id="productTable" value="{!productList}" var="item">
 					<apex:column value="{!item.Code__c}" />
 					<apex:column >
 						<apex:facet name="header">상품 이름</apex:facet>
-						<apex:outputLink value="SearchDetail?Id={!item.Id}&searchKeyword={!searchKeyword}">{!item.Name}</apex:outputLink>
+						<apex:outputLink value="SearchDetail?Id={!item.Id}&searchKeyword={!encodingKeyword}&page={!page}&branchId={!branchId}">{!item.Name}</apex:outputLink>
 					</apex:column>
 					<apex:column value="{!item.Category1__c}" />
 					<apex:column value="{!item.Category2__c}" />
@@ -26,28 +52,35 @@
 					<apex:column value="{!item.ProductYear__c}" />
 				</apex:pageBlockTable>
 			</apex:pageBlock>
+			<apex:outputPanel id="pagination">
 			<div class="text-center">
 				<nav aria-label="Page navigation">
 					<ul class="pagination">
-						<li>
-							<a href="#" aria-label="Previous">
-								<span aria-hidden="true">&laquo;</span>
-							</a>
+						<li class="{!IF(nowBlock != 1, 'abled', 'disabled')}">
+							<apex:outputLink onclick="fnPrevBlock(); return false;" disabled="{!IF(nowBlock != 1, 'false', 'true')}">&lt;</apex:outputLink>
 						</li>
-						<li><a href="SearchProduct">1</a></li>
-						<li><a href="SearchProduct">2</a></li>
-						<li><a href="SearchProduct">3</a></li>
-						<li><a href="SearchProduct">4</a></li>
-						<li><a href="SearchProduct">5</a></li>
-						<li>
-							<a href="#" aria-label="Next">
-								<span aria-hidden="true">&raquo;</span>
-							</a>
+						<apex:repeat value="{!pageList}" var="pageNum">
+							<li>
+								<apex:commandLink action="{!setCounter}" value="{!pageNum}" rerender="mainForm">
+									<apex:param name="page" value="{!pageNum}" assignTo="{!page}" />
+								</apex:commandLink>
+							</li>
+						</apex:repeat>
+						<li class="{!IF(nowBlock != totalBlock, 'abled', 'disabled')}">
+							<apex:outputLink onclick="fnNextBlock(); return false;" disabled="{!IF(nowBlock != totalBlock, 'false', 'true')}">&gt;</apex:outputLink>
 						</li>
 					</ul>
 				</nav>
 			</div>
+			</apex:outputPanel>
+			
+			<apex:actionFunction status="IngStatus" name="fnPrevBlock" action="{!prevBlock}" rerender="productTable, pagination"/>
+			<apex:actionFunction status="IngStatus" name="fnNextBlock" action="{!nextBlock}" rerender="productTable, pagination"/>
 		</apex:form>
 	</div>
 </body>
+<div id="waitWindow" style="text-align:center;">
+    <img src="{!URLFOR($Resource.YUI, 'rel_interstitial_loading.gif')}"/>
+    <div>처리중입니다.<br/>이창을 닫지 마시고 잠시만 기다리세요</div>
+</div>	
 </apex:page>

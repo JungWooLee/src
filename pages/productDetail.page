@@ -20,19 +20,20 @@
             $j("#waitWindow").dialog("close");
             return false;
         }         
-        
-
     </script>
 </head> 
 <body>
     <apex:form id="mainForm">
         <apex:sectionHeader title="상품등록 > 상품상세정보"/>
         <apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
-        <apex:PageMessages escape="false" />
+        <apex:PageMessages escape="false" id="msg"/>
         <!-- Functions -->
-        <apex:actionFunction action="{!goMoveSection}" name="AF_goMoveSection" status="IngStatus"  rerender="mainForm" Immediate="true"> 
+        <apex:actionFunction action="{!goMoveSection}" name="AF_goMoveSection" status="IngStatus" rerender="mainForm" Immediate="true"> 
             <apex:param name="sectionSeq" value="" assignTo="{!sectionSeq}"/>
-        </apex:actionFunction>	        
+        </apex:actionFunction>
+        <apex:actionFunction action="{!detailEdit}" name="SCdetailEdit" status="IngStatus" rerender="mainForm"> 
+            <apex:param name="productDetailId" value="" assignTo="{!productDetailId}"/>
+        </apex:actionFunction>        	        
         <!-- Functions -->
         <table>
             <tr>
@@ -52,9 +53,11 @@
                 </td>       
         
                 <td width="100%">
-                    <apex:PageBlock >
+                    <apex:PageBlock rendered="{!!detailflag}">
                         <apex:pageBlockSection id="sc2" columns="2" title="상품정보">
-                            <apex:outputField label="상품명" value="{!product.Name}"/>
+                            <apex:outputField label="상품명" value="{!product.Name}">
+                            <apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
+                            </apex:outputField>
                             <apex:outputField value="{!product.Code__c}"/>
                             
                             <apex:outputField value="{!product.Category1__c}"/>
@@ -75,6 +78,12 @@
                         		<apex:commandButton action="{!detailMinus}" value="-" rerender="mainForm" immediate="true" style="width:50px;"/>
                         	</apex:outputPanel>
 	                        <apex:pageBlockTable value="{!productDetailList}" var="list" id="sc1" title="상품상세정보">
+	                        	<apex:column >
+	                        		<apex:facet name="header"></apex:facet>
+									<apex:outputPanel rendered="{!list.Id<>null}">
+										<input class="btn" type="button" onclick="SCdetailEdit('{!list.Id}');" value="수정"/>
+									</apex:outputPanel>	                        	
+								</apex:column>
 								<apex:column >
 									<apex:facet name="header">모델코드</apex:facet>
 									<apex:outputField value="{!list.ModelCode__c}" rendered="{!list.Id<>null}">
@@ -104,17 +113,17 @@
 								</apex:column>
 								<apex:column >		
 									<apex:facet name="header">사이즈(세로,mm)</apex:facet>							
-									<apex:outputField value="{!list.Height__c}" rendered="{!list.Id<>null}">
+									<apex:outputField value="{!list.Vertical__c}" rendered="{!list.Id<>null}">
 										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
 									</apex:outputField>
-									<apex:inputField value="{!list.Height__c}" rendered="{!list.Id=null}" style="width:50px;"/>
+									<apex:inputField value="{!list.Vertical__c}" rendered="{!list.Id=null}" style="width:50px;"/>
 								</apex:column>
 								<apex:column >									
 									<apex:facet name="header">사이즈(높이,mm)</apex:facet>
-									<apex:outputField value="{!list.Vertical__c}" rendered="{!list.Id<>null}">
+									<apex:outputField value="{!list.Height__c}" rendered="{!list.Id<>null}">
 										<apex:inlineEditSupport showOnEdit="saveButton, cancelButton"  hideOnEdit="editButton" event="ondblclick"  changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>
 									</apex:outputField>		
-									<apex:inputField value="{!list.Vertical__c}" rendered="{!list.Id=null}" style="width:50px;"/>																
+									<apex:inputField value="{!list.Height__c}" rendered="{!list.Id=null}" style="width:50px;"/>																
 								</apex:column>
 								<apex:column >									
 									<apex:facet name="header">색상</apex:facet>
@@ -151,13 +160,31 @@
 	                        </apex:pageBlockTable>
 						</apex:pageBlockSection>
                     </apex:PageBlock>
+					<apex:PageBlock id="editForm" rendered="{!detailflag}">
+						<apex:pageBlockSection columns="1">
+							<apex:outputField value="{!editProductDetail.ModelCode__c}" />
+							<apex:inputField value="{!editProductDetail.Count__c}" />
+							<apex:inputField value="{!editProductDetail.Horizontal__c}" />
+							<apex:inputField value="{!editProductDetail.Vertical__c}" />
+							<apex:inputField value="{!editProductDetail.Height__c}" />
+							<apex:inputField value="{!editProductDetail.Color__c}" />
+							<apex:inputField value="{!editProductDetail.ProductionYear__c}" />
+							<apex:inputField value="{!editProductDetail.OrgPrice__c}" />
+							<apex:inputField value="{!editProductDetail.DiscountRate__c}" />
+						</apex:pageBlockSection>
+		                <apex:pageBlockButtons location="bottom">
+		                    <apex:commandButton value="수정저장" action="{!detailUpdate}" status="IngStatus" rerender="mainForm"/>
+		                    <apex:commandButton value="취소" action="{!detailCancel}" status="IngStatus" rerender="mainForm" immediate="true"/>     
+		                </apex:pageBlockButtons> 				
+					</apex:PageBlock>  
             	</td>            	
             </tr>
-        </table>            
+        </table>                 
     </apex:form>
 </body>
 <div id="waitWindow" style="text-align:center;">
-    <img src="{!URLFOR($Resource.YUI, 'rel_interstitial_loading.gif')}"/>
+	<img src="{!URLFOR($Resource.YUI, 'rel_interstitial_loading.gif')}"/>
     <div>처리중입니다.<br/>이창을 닫지 마시고 잠시만 기다리세요</div>
-</div>  
+</div>
+
 </apex:page>
