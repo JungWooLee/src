@@ -1,3 +1,10 @@
+/**
+* Object        : Branch__c
+* Function      : BranchController 
+* Author        : 
+* Date          : 
+* Description   : 
+*/
 public with sharing class BranchController {
 	 
 	public String pageMode{get;set;}
@@ -21,34 +28,24 @@ public with sharing class BranchController {
 			branch = new Branch__c();
 			contact = new Contact();
 		}else{
-			pageMode= isRegister=='yes'? 'V' : 'E';
+			pageMode = 'V';
 			getbranch();
 			getcontact();
 		}	
 		
 	}
 	
-	/*
-		처음 대리점을 만들때는 getparameter로 ID가 들어가지 않고 
-		만들어진 대리점을 수정할때는 getParameter로 ID가 들어간다.
-		화면은 똑같다
-		*/
 	public pageReference save(){
 		
-		if(branchId==null){
-			insert branch;
-			contact.LastName = branch.Name;
-			contact.BranchContact__c = branch.ID;
-			insert contact; 
-		}
-		else{
-			contact.LastName = branch.Name;
-			update branch;
-			update contact;
-		}
-		
-		return getPage('/apex/RegisterBranch?Id=' + branch.Id
-		+ '&register=yes');
+		upsert branch;
+		contact.LastName = branch.Name;
+		contact.BranchContact__c = branch.ID;
+		upsert contact;
+		return getPage('/apex/RegisterBranch?Id=' + branch.Id + '&register=yes');
+	}
+	
+	public void edit(){
+		pageMode = 'E';
 	}
 	
 	public pageReference branchList(){
@@ -69,12 +66,12 @@ public with sharing class BranchController {
 	
 	public pageReference deletebranch(){
 		
-		List<BranchProduct__c> branchProducts = [select BranchProduct__c from BranchProduct__c 
-		where BranchProduct__c.BranchProduct__c =: branch.Id];
+		List<BranchProduct__c> branchProducts = [select Id from BranchProduct__c 
+														where BranchProduct__c.BranchProduct__c =: branch.Id];
 		
 		if(branchProducts.size() == 0){	//같은게 없다면 묶여있는 branchproduct가 없으니까 그냥 지운다.
 			delete branch;
-			delete contact;
+			if(contact.Id <> null) delete contact;
 		}
 		else{
 			branch.isActive__c = false;
@@ -82,18 +79,20 @@ public with sharing class BranchController {
 		}
 			 
 		return branchList();
-	
 	}
 	
 	
 	public void getbranch(){
-		branch = [SELECT Id, Name, BranchID__c,  Ranking__c, ManagerEmail__c, 
-		ZipCode__c, Address__c, AddressDetail__c, Employees__c FROM Branch__c WHERE Id =: branchId];
+		branch = [SELECT Id, Name, BranchID__c, BranchPW__c, Ranking__c, ManagerEmail__c, 
+								ZipCode__c, Address__c, AddressDetail__c, Employees__c FROM Branch__c WHERE Id =: branchId];
 	}
 	
 	public void getcontact(){
-		contact = [SELECT LastName, Phone 
-		from Contact where LastName =: branch.Name];
+		List<Contact> contacts = [SELECT BranchContact__c, LastName, Phone 
+										from Contact where BranchContact__c =: branchId];
+							
+		if(contacts.size() > 0) contact = contacts[0];
+		else contact = new Contact();
 	}
 	
     

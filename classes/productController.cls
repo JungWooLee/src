@@ -12,8 +12,8 @@ public with sharing class productController {
     public String productId{get;set;}
     public String productDetailId{get;set;}
     
-    public Product__c product{get;set;}
-    public Account account{get;set;}
+    public Product__c product{get;set;}			//상품입력 object변수
+    public Account account{get;set;}			//거래처 object변수
     public ProductDetail__c editProductDetail{get;set;}
     
     public List<ProductDetail__c> productDetailList{get;set;}

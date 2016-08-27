@@ -24,27 +24,54 @@
             $j("#waitWindow").dialog("close");
             return false;
         }         
-
+        
+		function fnSelect(chkboxCtrl, chkboxValue){
+			if(chkboxCtrl.checked == true){
+				addSelectedList(chkboxValue);
+			}
+			else{
+				deleteFromList(chkboxValue);
+			}
+		}
 	</script>
 </head>
 <body>
 	<div id="mainBody">
 		<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
-		<apex:sectionHeader title="상품검색" />
-		<apex:pageBlock >
-			<apex:form >
-				상품명 : <apex:inputText value="{!searchKeyword}" style="width:400px; margin-left:5px" />
-				<apex:commandButton value="검색" action="{!setProductList}" status="IngStatus" style="margin-left:5px" rerender="productTable, pagination" />
-			</apex:form>
-		</apex:pageBlock>
-		<apex:form id="mainForm">
-			<apex:pageMessages />
+		<apex:outputPanel id="scForm" rendered="{!seq='1'}">
+			<apex:sectionHeader title="상품검색"/>
 			<apex:pageBlock >
+				<apex:form >
+					상품명 : <apex:inputText value="{!searchKeyword}" style="width:400px; margin-left:5px" />
+					<apex:commandButton value="검색" action="{!setProductList}" status="IngStatus" style="margin-left:5px" rerender="productTable, pagination" />
+				</apex:form>
+			</apex:pageBlock>
+		</apex:outputPanel>
+
+		<apex:form id="mainForm">
+			<apex:PageMessages escape="false" id="msg"/>
+			<!-- function -->	
+			<apex:actionFunction status="IngStatus" name="fnPrevBlock" action="{!prevBlock}" rerender="productTable, pagination"/>
+			<apex:actionFunction status="IngStatus" name="fnNextBlock" action="{!nextBlock}" rerender="productTable, pagination"/>
+			<apex:actionFunction name="addSelectedList" action="{!addOrderList}" rerender="requestTable">
+				<apex:param name="param" assignTo="{!checkboxValue}" value="" />
+			</apex:actionFunction>
+			<apex:actionFunction name="deleteFromList" action="{!deleteOrderList}" rerender="requestTable">
+				<apex:param name="param" assignTo="{!checkboxValue}" value="" />
+			</apex:actionFunction>
+			<apex:actionFunction name="doOrder" action="{!doOrder}" rerender="detailTable, requestTable" />			
+			<!-- function -->	
+			
+			<!-- seq='1' 상품검색-->
+			<apex:sectionHeader title="상품리스트" rendered="{!seq='1'}"/>
+			<apex:pageBlock rendered="{!seq='1'}">
 				<apex:pageBlockTable id="productTable" value="{!productList}" var="item">
 					<apex:column value="{!item.Code__c}" />
-					<apex:column >
+					<apex:column>
 						<apex:facet name="header">상품 이름</apex:facet>
-						<apex:outputLink value="SearchDetail?Id={!item.Id}&searchKeyword={!encodingKeyword}&page={!page}&branchId={!branchId}">{!item.Name}</apex:outputLink>
+						<apex:commandLink action="{!initDetailList}" value="{!item.Name}" rerender="mainForm, scForm">
+							<apex:param name="productId" value="{!item.Id}" assignTo="{!productId}" />
+						</apex:commandLink>
 					</apex:column>
 					<apex:column value="{!item.Category1__c}" />
 					<apex:column value="{!item.Category2__c}" />
@@ -52,30 +79,109 @@
 					<apex:column value="{!item.ProductYear__c}" />
 				</apex:pageBlockTable>
 			</apex:pageBlock>
-			<apex:outputPanel id="pagination">
-			<div class="text-center">
-				<nav aria-label="Page navigation">
-					<ul class="pagination">
-						<li class="{!IF(nowBlock != 1, 'abled', 'disabled')}">
-							<apex:outputLink onclick="fnPrevBlock(); return false;" disabled="{!IF(nowBlock != 1, 'false', 'true')}">&lt;</apex:outputLink>
-						</li>
-						<apex:repeat value="{!pageList}" var="pageNum">
-							<li>
-								<apex:commandLink action="{!setCounter}" value="{!pageNum}" rerender="mainForm">
-									<apex:param name="page" value="{!pageNum}" assignTo="{!page}" />
-								</apex:commandLink>
+			<apex:outputPanel id="pagination" rendered="{!seq='1'}">
+				<div class="text-center">
+					<nav aria-label="Page navigation">
+						<ul class="pagination">
+							<li class="{!IF(nowBlock != 1, 'abled', 'disabled')}">
+								<apex:outputLink onclick="fnPrevBlock(); return false;" disabled="{!IF(nowBlock != 1, 'false', 'true')}">&lt;</apex:outputLink>
 							</li>
-						</apex:repeat>
-						<li class="{!IF(nowBlock != totalBlock, 'abled', 'disabled')}">
-							<apex:outputLink onclick="fnNextBlock(); return false;" disabled="{!IF(nowBlock != totalBlock, 'false', 'true')}">&gt;</apex:outputLink>
-						</li>
-					</ul>
-				</nav>
-			</div>
+							<apex:repeat value="{!pageList}" var="pageNum">
+								<li>
+									<apex:commandLink action="{!setCounter}" value="{!pageNum}" rerender="mainForm">
+										<apex:param name="page" value="{!pageNum}" assignTo="{!page}" />
+									</apex:commandLink>
+								</li>
+							</apex:repeat>
+							<li class="{!IF(nowBlock != totalBlock, 'abled', 'disabled')}">
+								<apex:outputLink onclick="fnNextBlock(); return false;" disabled="{!IF(nowBlock != totalBlock, 'false', 'true')}">&gt;</apex:outputLink>
+							</li>
+						</ul>
+					</nav>
+				</div>
 			</apex:outputPanel>
+			<!-- seq='1' 상품검색-->
 			
-			<apex:actionFunction status="IngStatus" name="fnPrevBlock" action="{!prevBlock}" rerender="productTable, pagination"/>
-			<apex:actionFunction status="IngStatus" name="fnNextBlock" action="{!nextBlock}" rerender="productTable, pagination"/>
+			<!-- seq='2' 상품디테일 리스트-->
+				<apex:sectionHeader title="상품 상세리스트" rendered="{!seq='2'}"/>
+				<apex:pageBlock rendered="{!seq='2'}">
+					<apex:pageBlockTable id="detailTable" value="{!detailList}" var="item">
+						<apex:column >
+							<apex:facet name="header">주문</apex:facet>
+							<apex:inputCheckbox styleclass="chkbox" onchange="fnSelect(this, '{!item.ModelCode__c}')"/>
+						</apex:column>
+						<apex:column value="{!item.ModelCode__c}" />
+						<apex:column value="{!item.Horizontal__c}" />
+						<apex:column value="{!item.Vertical__c}" />
+						<apex:column value="{!item.Height__c}" />
+						<apex:column value="{!item.Color__c}" />
+						<apex:column value="{!item.ProductionYear__c}" />
+						<apex:column value="{!item.Count__c}" />
+					</apex:pageBlockTable>
+				</apex:pageBlock>
+				
+				<apex:sectionHeader title="주문목록" rendered="{!seq='2'}"/>
+				<apex:pageBlock rendered="{!seq='2'}">
+					<apex:pageBlockButtons location="bottom">
+						<apex:commandButton value="주문" action="{!doOrder}" rerender="mainForm, scForm" status="IngStatus" />
+						<apex:commandButton value="상품목록으로" action="{!goProductList}" rerender="mainForm, scForm" status="IngStatus" />
+					</apex:pageBlockButtons>
+					<apex:pageBlockTable id="requestTable" value="{!orderList}" var="item">
+						<apex:column value="{!item.productDetail.ModelCode__c}">
+							<apex:facet name="header">모델코드</apex:facet>
+						</apex:column>
+						<apex:column value="{!item.productDetail.ProductionYear__c}">
+							<apex:facet name="header">생산년도</apex:facet>
+						</apex:column>
+						<apex:column value="{!item.productDetail.Count__c}">
+							<apex:facet name="header">상품수량</apex:facet>
+						</apex:column>
+						<apex:column >
+							<apex:facet name="header">주문수량</apex:facet>
+							<apex:inputText value="{!item.orderAmount}" />
+						</apex:column>
+						<apex:column >
+							<apex:facet name="header">주문사유</apex:facet>
+							<apex:inputText value="{!item.Reason}" style="width:300px;"/>
+						</apex:column>
+					</apex:pageBlockTable>
+				</apex:pageBlock>
+			<!-- seq='2' 상품디테일 리스트-->
+			
+			<!-- seq='3' 대리점 주문리스트-->
+				<apex:sectionHeader title="주문정보" rendered="{!seq='3'}"/>
+				<apex:pageBlock rendered="{!seq='3'}">
+					<apex:pageBlockButtons location="bottom">
+						<apex:commandButton action="{!goProductList}" value="상품목록" status="IngStatus" rerender="mainForm" />
+					</apex:pageBlockButtons>
+					<apex:pageBlockTable value="{!OrderList}" var="item">
+						<apex:column>
+							<apex:facet name="header">상품명</apex:facet>
+							<apex:outputField value="{!item.product.Name}" />
+						</apex:column>
+						<apex:column>
+							<apex:facet name="header">상품코드</apex:facet>
+							<apex:outputField value="{!item.product.Code__c}" />
+						</apex:column>
+						<apex:column>
+							<apex:facet name="header">모델코드</apex:facet>
+							<apex:outputField value="{!item.productDetail.ModelCode__c}" />
+						</apex:column>
+						<apex:column>
+							<apex:facet name="header">주문수량</apex:facet>
+							<apex:outputField value="{!item.history.Count__c}" />
+						</apex:column>
+						<apex:column>
+							<apex:facet name="header">주문사유</apex:facet>
+							<apex:outputField value="{!item.history.Reason__c}" />
+						</apex:column>
+						<apex:column>
+							<apex:facet name="header">주문일</apex:facet>
+							<apex:outputField value="{!item.history.CreatedDate}" />
+						</apex:column>
+					</apex:pageBlockTable>
+				</apex:pageBlock>
+			<!-- seq='3' 대리점 주문리스트-->
 		</apex:form>
 	</div>
 </body>

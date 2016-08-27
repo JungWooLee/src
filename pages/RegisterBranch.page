@@ -5,25 +5,35 @@
     <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
     <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-1.6.2.min.js')}"></script>
     <script type="text/javascript" src="{!URLFOR($Resource.jQueryUI,'js/jquery-ui-1.8.15.custom.min.js')}"></script>
-	<script>
-	 $j = jQuery.noConflict();
-		 $j(document).ready(function(){
-            $j("#waitWindow").dialog({ autoOpen: false, modal: true, position: 'center', closeText: 'hide', draggable: false, title:'처리중...' });
-            $j('.disabled').attr('disabled','disabled');
-        });    
+	<script type="text/javascript">
+	 	$j = jQuery.noConflict();
+		$j(document).ready(function(){
+			$j("#waitWindow").dialog({ autoOpen: false, modal: true, position: 'center', closeText: 'hide', draggable: false, title:'처리중...' });
+			$j('.disabled').attr('disabled','disabled');
+        });
+		function showDialog(){
+            $j("#waitWindow").dialog("open");
+            return false;
+        }  
+     	function hideDialog(){
+            $j("#waitWindow").dialog("close");
+            return false;
+        }          
+            
 	</script>
 </head>
 <body>
-<h1>{!If(branchid=null, '대리점 등록', If(ISNULL(isRegister),'대리점 수정','대리점 등록완료') )}</h1>
 
 <apex:form id="mainForm">
-<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
-<apex:actionFunction name="branchList" action="{!branchList}" immediate="true"/>
+	<apex:sectionHeader title="{!If(branchid=null, '대리점 등록', If(ISNULL(isRegister),'대리점 수정','대리점 등록완료') )}"/>
+	<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
+	<apex:actionFunction name="branchList" action="{!branchList}" immediate="true"/>
 	<apex:PageBlock id="pBlock" >
-	 <apex:pageBlockButtons location="both">
-              <apex:commandButton value="저장"  status="IngStatus" rerender="mainForm" action="{!save}" rendered="{!pageMode='E'}"/>               
-              <input type="button" class="btn btn-class" value="대리점목록"  status="IngStatus"  onclick="branchList()" immediate="true"/>     
-     </apex:pageBlockButtons>
+		<apex:pageBlockButtons location="both">
+			<apex:commandButton value="저장"  status="IngStatus" rerender="mainForm" action="{!save}" rendered="{!pageMode='E'}"/>       
+			<apex:commandButton value="수정"  status="IngStatus" rerender="mainForm" action="{!edit}" rendered="{!pageMode='V'}"/>          
+			<input type="button" class="btn btn-class" value="대리점목록"  onclick="branchList();"/>     
+		</apex:pageBlockButtons>
                 
 		<apex:pageBlockSection id="sc1" columns="2" rendered="{!pageMode='E'}">
 			 <apex:pageBlockSectionItem >
@@ -33,33 +43,43 @@
 			 <apex:pageBlockSectionItem />
 			 
 			  <apex:pageBlockSectionItem >
-             	<apex:outputLabel value="대리점ID" />                                
-			 	<apex:inputField value="{!branch.BranchID__c}" type="text" style="width:400px;" required="true"/>
+             	<apex:outputLabel value="대리점ID" />
+             	<apex:outputPanel >                                
+				 	<apex:inputField value="{!branch.BranchID__c}" type="text" style="width:400px;" required="true" rendered="{!branch.BranchID__c == null}"/>
+				 	<apex:outputField value="{!branch.BranchID__c}" rendered="{!branch.BranchID__c <> null}"/>
+				</apex:outputPanel> 	
              </apex:pageBlockSectionItem>							
 			 <apex:pageBlockSectionItem />
-			  
+			 
+			<apex:pageBlockSectionItem >
+             	<apex:outputLabel value="대리점 비밀번호" />      
+             	<apex:outputPanel >                          
+				 	<apex:inputSecret value="{!branch.BranchPw__c}" style="width:400px;" required="true" rendered="{!branch.BranchPw__c == null}"/>
+				 	<apex:outputText value="{!LEFT('branch.BranchPw__c',2)}*****" rendered="{!branch.BranchPw__c <> null}"/>
+				</apex:outputPanel> 	
+             </apex:pageBlockSectionItem>							
+			 <apex:pageBlockSectionItem />
+			 
 			  <apex:pageBlockSectionItem >
              	<apex:outputLabel value="등급" />                                
-			 	<apex:inputField value="{!branch.Ranking__c}" type="text" style="width:400px;"/>
+			 	<apex:inputField value="{!branch.Ranking__c}"/>
              </apex:pageBlockSectionItem>							
 			 <apex:pageBlockSectionItem />
 			 
 			  <apex:pageBlockSectionItem >
              	<apex:outputLabel value="매니저메일" />                                
-			 	<apex:inputField value="{!branch.ManagerEmail__c}" type="text" style="width:400px;"/>
+			 	<apex:inputField value="{!branch.ManagerEmail__c}" style="width:300px;"/>
              </apex:pageBlockSectionItem>							
 			 <apex:pageBlockSectionItem />
 			 
-		<apex:pageBlockSectionItem >
+			<apex:pageBlockSectionItem >
              	<apex:outputLabel value="우편번호" />                                
-             <apex:outputPanel >
-             	<apex:inputField value="{!branch.ZipCode__c}" type="text" styleClass="zipcode" style="width:300px;"/>
-             	<apex:commandButton value="우편번호찾기" onclick="execDaumPostcode()" rerender="mainForm" immediate="true" style="width:50px;margin-right:1em;"/>
-             </apex:outputPanel>	
-                  </apex:pageBlockSectionItem>						
+				<apex:outputPanel >
+					<apex:inputField value="{!branch.ZipCode__c}" type="text" styleClass="zipcode" style="width:200px;"/>
+	             	<input type="Button" value="우편번호찾기" onclick="execDaumPostcode();" class="btn" style="width:100px;margin-right:1em;"/>
+	             </apex:outputPanel>	
+             </apex:pageBlockSectionItem>						
 			 <apex:pageBlockSectionItem />
-			 
-			 
 			 										
 			<apex:pageBlockSectionItem >
              	<apex:outputLabel value="주소" />                                
@@ -75,62 +95,46 @@
 			 
 			 <apex:pageBlockSectionItem >
              	<apex:outputLabel value="직원수" />                                
-			 	<apex:inputField value="{!branch.Employees__c}" type="text" style="width:400px;" />
+			 	<apex:inputField value="{!branch.Employees__c}" type="text" />
              </apex:pageBlockSectionItem>							
 			 <apex:pageBlockSectionItem />	
 			 
 			  <apex:pageBlockSectionItem >
              	<apex:outputLabel value="연락처" />                                
-			 	<apex:inputField value="{!contact.Phone}" type="text" style="width:400px;" />
+			 	<apex:inputField value="{!contact.Phone}" required="true"/>
              </apex:pageBlockSectionItem>							
 			 <apex:pageBlockSectionItem />	
-			 		
 		</apex:pageBlockSection>
-		
-		 
+
 		<apex:pageBlockSection id="sc2" columns="1" rendered="{!pageMode='V'}">                                
-							<apex:outputField label="대리점이름" value="{!branch.Name}"/>
-							<apex:outputField value="{!branch.BranchID__c}"/>               
-                            <apex:outputField value="{!branch.Ranking__c}" style="width:200px;"/>
-                            <apex:outputField value="{!branch.ManagerEmail__c}"/>
-       						<apex:outputField value="{!branch.ZipCode__c}" />
-                            <apex:outputField value="{!branch.Address__c}" />                    
-                            <apex:outputField value="{!branch.AddressDetail__c}"/>
-                            <apex:outputField value="{!branch.Employees__c}" />
-                            <apex:outputField value="{!contact.Phone}" />
-                           
-						</apex:pageBlockSection>
-		
+			<apex:outputField label="대리점이름" value="{!branch.Name}"/>
+			<apex:outputField value="{!branch.BranchID__c}"/> 
+			<apex:outputText label="대리점 비밀번호" value="{!LEFT('branch.BranchPw__c',2)}*****"/>            
+			<apex:outputField value="{!branch.Ranking__c}"/>
+			<apex:outputField value="{!branch.ManagerEmail__c}"/>
+			<apex:outputField value="{!branch.ZipCode__c}" />
+			<apex:outputField value="{!branch.Address__c}" />                    
+			<apex:outputField value="{!branch.AddressDetail__c}"/>
+			<apex:outputField value="{!branch.Employees__c}" />
+			<apex:outputField value="{!contact.Phone}" />
+		</apex:pageBlockSection>
 	</apex:PageBlock>
 </apex:form> 
+<apex:relatedList title="대리점상품" id="branchProductetails" list="BranchProduct__r" subject="{!branch.Id}" rendered="{!pageMode='V'}"/>	
 </body>
 <div id="waitWindow" style="text-align:center;">
     <img src="{!URLFOR($Resource.YUI, 'rel_interstitial_loading.gif')}"/>
     <div>처리중입니다.<br/>이창을 닫지 마시고 잠시만 기다리세요</div>
 </div>
 
-
-<script src="/soap/ajax/30.0/connection.js"> </script >
-<script src="/soap/ajax/30.0/apex.js"> </script >
-
-<script src="https://spi.maps.daum.net/imap/map_js_init/postcode.v2.js"></script>
-    <script>
-    
-  
-	
-	/*
-	function branchList(){
-		//sforce.apex.excute("BranchController", "branchList",{});
-		BranchController.branchList();
-	}
-	*/
+<script type="text/javascript" src="https://spi.maps.daum.net/imap/map_js_init/postcode.v2.js"></script>
+<script type="text/javascript">
     $j = jQuery.noConflict();
     
     function callBranchList(){
     	branchList();
     }
-    
-    
+
     function execDaumPostcode(){ 
     	
     	new daum.Postcode({
@@ -138,7 +142,7 @@
     		oncomplete: function(data) {
                 // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
                 
-                    // 도로명 주소의 노출 규칙에 따라 주소를 조합한다.
+				// 도로명 주소의 노출 규칙에 따라 주소를 조합한다.
                 // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
                 var fullRoadAddr = data.roadAddress; // 도로명 주소 변수
                 var extraRoadAddr = ''; // 도로명 조합형 주소 변수
@@ -160,32 +164,13 @@
                 if(fullRoadAddr !== ''){
                     fullRoadAddr += extraRoadAddr;
                 }
-                 //document.getElementById("{!$Component.mainForm.pBlock.sc1.zipcodeitem.zipcode}").value = data.zonecode;
                 
-                
-                 //document.getElementById("{!$Component.mainForm.pBlock.sc1.addressdetailitem.addressdetail}").value = data.jibunAddress;
                 $j('.zipcode').val(data.zonecode);
                 $j('.address').val(fullRoadAddr);
                 $j('.addressdetail').val(data.jibunAddress);
                  
-                }
-                
-            	 
+			} 
     	}).open();
     }    
-    
-    
-    
-     function showDialog(){
-            $j("#waitWindow").dialog("open");
-            return false;
-        }
-        
-     function hideDialog(){
-            $j("#waitWindow").dialog("close");
-            return false;
-        }         
-    </script>
- 
- 
+</script>
 </apex:page>

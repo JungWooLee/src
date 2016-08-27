@@ -1,4 +1,6 @@
-<apex:page standardController="Product__c" extensions="productController" standardStylesheets="true" docType="html-5.0">
+<apex:page standardController="Product__c" 
+extensions="productController" standardStylesheets="true" 
+docType="html-5.0">
 <head>
     <apex:stylesheet value="{!URLFOR($Resource.button_image_salesforce, 'btn.css')}"  />
     <apex:stylesheet value="{!URLFOR($Resource.jQueryUI, '/css/ui-lightness/jquery-ui-1.8.15.custom.css')}"/>
@@ -27,18 +29,20 @@
     <apex:form id="mainForm">
 		<apex:sectionHeader title="상품등록"/>
 		<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
-        <apex:PageMessages escape="false" />
+        <apex:PageMessages escape="false" id="msg"/>
 		<!-- Functions -->
         <apex:actionFunction action="{!goMoveSection}" name="AF_goMoveSection" status="IngStatus"  rerender="mainForm" Immediate="true"> 
             <apex:param name="sectionSeq" value="" assignTo="{!sectionSeq}"/>
-        </apex:actionFunction>		
+        </apex:actionFunction>
+        <apex:actionFunction action="{!productList}" name="productListPage" 
+        				status="IngStatus"  rerender="mainForm" Immediate="true"/>		
 		<!-- Functions -->
 		<table>
             <tr>
                 <td width="200px"><!-- 여기가 세션 네비게이터 -->
                     <apex:outputPanel >
 	                    <span class="buttonyh {!IF(sectionSeq='1','blue','')} large" style="margin-bottom:2px;">
-	                        <a style="width:200px;" href="javascript:AF_goMoveSection('1');" target="_parent">
+	                        <a style="width:200px;" href="javascript:AF_goMoveSection('1','b');" target="_parent">
 	                            1.상품정보
 	                        </a>
 	                    </span>
@@ -53,9 +57,10 @@
 				<td width="100%">
                     <apex:PageBlock >
                         <apex:pageBlockButtons location="both">
-                            <apex:commandButton value="저장" action="{!save}" status="IngStatus" rerender="mainForm" rendered="{!pageMode='E'}"/>
+                            <apex:commandButton value="저장" action="{!save}" status="IngStatus" rerender="mainForm,fff,fff,333" rendered="{!pageMode='E'}"/>
                             <apex:commandButton value="수정" action="{!edit}" status="IngStatus" rendered="{!pageMode='V'}" rerender="mainForm" immediate="true"/>
-                            <apex:commandButton value="상품목록" action="{!productList}" status="IngStatus" rerender="mainForm" immediate="true"/>     
+                            <input type="Button" class="btn" value="상품목록"  
+                            					onclick="productListPage();"/>     
                         </apex:pageBlockButtons> 
 
 						<apex:pageBlockSection id="sc1" columns="2" rendered="{!pageMode='E'}">
