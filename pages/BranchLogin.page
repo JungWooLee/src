@@ -19,7 +19,7 @@
 				        				<apex:outputLabel value="{!$Label.site.username}" for="username"/>
 				        				<apex:inputField id="username" value="{!branch.BranchID__c}" required="true"/> <!-- id -->
 				        				<apex:outputLabel value="{!$Label.site.password}" for="password"/>
-				        				<apex:inputField id="password" value="{!branch.BranchPW__c}" required="true"/> <!-- Pass -->
+				        				<apex:inputSecret id="password" value="{!branch.BranchPW__c}" required="true"/> <!-- Pass -->
 				        				<apex:outputText value=""/>
 				        				<apex:commandButton action="{!login}" value="{!$Label.site.login_button}" id="loginButton" rerender="mainform"/>
 				      				</apex:panelGrid>
@@ -30,9 +30,6 @@
              		</apex:outputPanel>
           		</apex:panelGrid> 
        		</apex:panelGrid>
-       		<apex:outputPanel rendered="{!view}">
-       			<apex:commandLink action="{!logout}" value="logout" id="logout" reRender="mainform" style="margin-bottom:20px;"/>
-       		</apex:outputPanel>
     		<apex:iframe src="{!siteUrl}" scrolling="true" id="branchframe" width="90%" height="800px;" rendered="{!view}"/>   
       	</center>
       <br/>

@@ -36,12 +36,16 @@ public with sharing class BranchController {
 	}
 	
 	public pageReference save(){
-		
-		upsert branch;
-		contact.LastName = branch.Name;
-		contact.BranchContact__c = branch.ID;
-		upsert contact;
-		return getPage('/apex/RegisterBranch?Id=' + branch.Id + '&register=yes');
+		try{
+			upsert branch;
+			contact.LastName = branch.Name;
+			contact.BranchContact__c = branch.ID;
+			upsert contact;
+			return getPage('/apex/RegisterBranch?Id=' + branch.Id + '&register=yes');
+		}catch(Exception e){
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.severity.ERROR, e.getMessage()));	
+		}
+			return null;
 	}
 	
 	public void edit(){

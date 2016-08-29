@@ -25,6 +25,7 @@
 <body>
 
 <apex:form id="mainForm">
+<apex:PageMessages escape="false" id="msg"/>
 	<apex:sectionHeader title="{!If(branchid=null, '대리점 등록', If(ISNULL(isRegister),'대리점 수정','대리점 등록완료') )}"/>
 	<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
 	<apex:actionFunction name="branchList" action="{!branchList}" immediate="true"/>
