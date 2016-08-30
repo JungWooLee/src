@@ -38,16 +38,6 @@
 <body>
 	<div id="mainBody">
 		<apex:actionStatus onstart="showDialog();" onstop="hideDialog();"  id="IngStatus"/>
-		<apex:outputPanel id="scForm" rendered="{!seq='1'}">
-			<apex:sectionHeader title="상품검색"/>
-			<apex:pageBlock >
-				<apex:form >
-					상품명 : <apex:inputText value="{!searchKeyword}" style="width:400px; margin-left:5px" />
-					<apex:commandButton value="검색" action="{!setProductList}" status="IngStatus" style="margin-left:5px" rerender="productTable, pagination" />
-				</apex:form>
-			</apex:pageBlock>
-		</apex:outputPanel>
-
 		<apex:form id="mainForm">
 			<apex:PageMessages escape="false" id="msg"/>
 			<!-- function -->	
@@ -63,6 +53,15 @@
 			<!-- function -->	
 			
 			<!-- seq='1' 상품검색-->
+			<apex:outputPanel id="scForm" rendered="{!seq='1'}">
+				<apex:sectionHeader title="상품검색"/>
+				<apex:pageBlock >
+					상품명 : <apex:inputText value="{!searchKeyword}" style="width:400px; margin-left:5px" />
+					<apex:commandButton value="검색" action="{!setProductList}" status="IngStatus" style="margin-left:5px" rerender="productTable, pagination" />
+					<apex:commandButton value="주문목록 보기" action="{!branchOrderList}" 
+							status="IngStatus" style="margin-left:5px" rerender="mainForm" />
+				</apex:pageBlock>
+			</apex:outputPanel>
 			<apex:sectionHeader title="상품리스트" rendered="{!seq='1'}"/>
 			<apex:pageBlock rendered="{!seq='1'}">
 				<apex:pageBlockTable id="productTable" value="{!productList}" var="item">

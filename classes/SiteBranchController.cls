@@ -37,7 +37,7 @@ public with sharing class SiteBranchController {
     	}else{  		
     		loginsave.Branch__c = temps[0].Id;
     		
-    		siteUrl = 'https://namu.wiki/';
+    		siteUrl = '/SearchProduct?Id='+temps[0].Id;
     		view = true;	
     	}
     	

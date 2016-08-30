@@ -34,8 +34,10 @@ public with sharing class SearchProductController {
     public String productId{get;set;}
     
     public SearchProductController(){
-    	String pageParam = apexPages.currentPage().getParameters().get('page');
+
     	branchId = apexPages.currentPage().getParameters().get('Id');
+    	
+    	 String pageParam = apexPages.currentPage().getParameters().get('page');
     	//로그인이 되어 있지 않으면 주문할 수 없음
 		if(branchId == null){
 			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, '대리점 ID를 확인 할 수 없습니다.'));
@@ -46,9 +48,9 @@ public with sharing class SearchProductController {
 	    		page = Integer.valueOf(pageParam);
 	    	}
 	    	//페이지마다 보일 리스트의 갯수
-	    	listSize = 10;
+	    	listSize = 2;
 	    	//한 블럭당 보일 페이지
-	    	pagePerBlock = 2;
+	    	pagePerBlock = 5;
 	    	counter = (page-1) * listSize;
 	    	totalSize = 0;
 	    	pageList = new List<Integer>();
@@ -123,15 +125,21 @@ public with sharing class SearchProductController {
 	    	orderHistorys.add(orderHistory);
 
     	}
-    	update updateDetails;
+    	Savepoint sp = Database.setSavepoint();
     	
-    	initDetailList();
-    	
-    	insert branchProductList;
-    	insert orderHistorys;
+		try{
+	    	update updateDetails;
+	    	
+	    	insert branchProductList;
+	    	insert orderHistorys;
+		}catch(exception ex){
+			 Database.rollback(sp);
+		}
+		
     	orderList.clear();
     	
 		seq = '3';
+		initDetailList();
 		branchOrderList();
     }
     
@@ -157,8 +165,8 @@ public with sharing class SearchProductController {
     													ProductDetail__r.Product__r.Category2__c,
     													ProductDetail__r.Product__r.Category3__c,
     													Reason__c, CreatedDate
-    											FROM ProductDetailHistory__c WHERE Branch__c =: branchId];
-
+    											FROM ProductDetailHistory__c WHERE Branch__c =: branchId order By CreatedDate desc];
+		orderList = new List<OrderInfo>();
     	for(ProductDetailHistory__c temp:temps){
     		OrderInfo orderInfo = new OrderInfo();
     		orderInfo.product = temp.ProductDetail__r.Product__r;
@@ -167,6 +175,7 @@ public with sharing class SearchProductController {
     		OrderList.add(orderInfo);
     	}
 		seq = '3';
+
     }
     
     
